@@ -1,0 +1,25 @@
+Bootstrap: docker
+From: julia:1.5.3-buster
+
+%environment
+  #export JULIA_LOAD_PATH="@polyorigin:"
+  export JULIA_PROJECT=/opt/local/src/polyorigin
+  export JULIA_DEPOT_PATH="${PWD}/.singularity/.julia:/opt/local/var/.julia"
+
+%files
+  Project.toml /opt/local/src/polyorigin/Project.toml
+  Manifest.toml /opt/local/src/polyorigin/Manifest.toml
+
+%post
+  export JULIA_DEPOT_PATH=/opt/local/var/.julia
+  export JULIA_PKG_PRECOMPILE_AUTO=1
+  export JULIA_PROJECT=/opt/local/src/polyorigin
+ 
+  mkdir -p ${JULIA_DEPOT_PATH}/environments/1.5
+  
+  /usr/local/julia/bin/julia -e 'using Pkg; Pkg.activate(); Pkg.instantiate(); Pkg.precompile(); Pkg.status()'
+
+%test
+  export JULIA_PROJECT=/opt/local/src/polyorigin
+  export JULIA_DEPOT_PATH="${PWD}/.singularity/.julia:/opt/local/var/.julia"
+  /usr/local/julia/bin/julia -e 'using PolyOrigin'
